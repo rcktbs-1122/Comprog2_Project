@@ -1,1 +1,232 @@
+ScreenManager:
+    StartupScreen:
+    MainScreen:
+
+<StartupScreen>:
+    name: 'startup'
+
+    MDFloatLayout:
+        canvas.before:
+            Rectangle:
+                source: "photos/tas/6.jpg"
+                size: root.width, root.height
+                pos: self.pos
+
+        MDLabel:
+            id: app_name_label
+            halign: 'center'
+            markup: True
+            text: "[b][size=70]Just-Do IT[/size][/b]"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            pos_hint: {'top': 0.7}
+            size_hint_y: None
+            height: dp(54)
+            theme_text_color: "Custom"
+            text_color: 0.9, 0.9, 0.8, 1
+
+        MDFloatLayout:
+            pos_hint: {'center_x': 0.5, 'y': 0.3}
+
+            MDRaisedButton:
+                text: "[b]View my To-Do's[/b]"
+                on_release: app.root.current = 'main'
+                elevation_normal: 12
+                size_hint: None, None
+                size: dp(200), dp(50)
+                font_size: "20sp"
+                font_name: "fonts/karmatic-arcade/ka1.ttf"
+                pos_hint: {'center_x': 0.5, 'y': -0.1}
+                text_color: 0, 0, 0, 1
+                md_bg_color: 0.9, 0.9, 0.8, 1
+
+            MDRaisedButton:
+                text: "[b]Exit[/b]"
+                on_release: app.stop()
+                elevation_normal: 12
+                size_hint: None, None
+                size: dp(200), dp(50)
+                font_size: "20sp"
+                font_name: "fonts/karmatic-arcade/ka1.ttf"
+                pos_hint: {'center_x': 0.5, 'y': -0.2}
+                text_color: 0, 0, 0, 1
+                md_bg_color: 0.9, 0.9, 0.8, 1
+
+<MainScreen>:
+    name: 'main'
+
+    MDFloatLayout:
+        canvas.before:
+            Rectangle:
+                source: "photos/tas/16cfcfe6-cc27-4d9e-9bd0-e27c916ffbb6.jpg"
+                size: root.width, root.height
+                pos: self.pos
+
+        MDLabel:
+            id: task_label
+            halign: 'center'
+            markup: True
+            text: "[b][size=57]Your To-do's[/size][/b]"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            pos_hint: {'top': 0.95}
+            size_hint_y: None
+            height: dp(54)
+            theme_text_color: "Custom"
+            text_color: 0.9, 0.9, 0.8, 1
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: None, None
+            size: self.minimum_size
+            spacing: dp(10)
+            padding: [dp(18), 0, dp(18), 0]
+            pos_hint: {'right': 0.98, 'top': 0.83}
+
+            MDRaisedButton:
+                text: "[b][size=15]Sort Alphabetically[/size][/b]"
+                on_release: app.sort_alphabetically()
+                elevation_normal: 12
+                size_hint: None, None
+                size: dp(75), dp(13)
+                font_size: "7sp"
+                font_name: "fonts/karmatic-arcade/ka1.ttf"
+                md_bg_color: 0.9, 0.9, 0.8, 1
+                text_color: 0, 0, 0, 1
+
+            MDRaisedButton:
+                text: "[b][size=15]Sort by Due Date[/size][/b]"
+                on_release: app.sort_by_due_date()
+                elevation_normal: 12
+                size_hint: None, None
+                size: dp(75), dp(10)
+                font_size: "7sp"
+                font_name: "fonts/karmatic-arcade/ka1.ttf"
+                md_bg_color: 0.9, 0.9, 0.8, 1
+                text_color: 0, 0, 0, 1
+
+        ScrollView:
+            pos_hint: {'top': 0.7, 'center_x': 0.5}
+            size_hint: 0.9, 0.6
+
+            MDList:
+                id: container
+                spacing: dp(10)
+
+        MDRaisedButton:
+            text: "[b]Add a To-Do[/b]"
+            on_release: app.show_task_dialog()
+            elevation_normal: 12
+            size_hint: None, None
+            size: dp(200), dp(50)
+            font_size: "28sp"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            pos_hint: {'center_x': 0.5, 'y': 0.04}
+            text_color: 0, 0, 0, 1
+            md_bg_color: 0.9, 0.9, 0.8, 1
+<DialogContent>:
+    orientation: "vertical"
+    spacing: "10dp"
+    size_hint: 1, None
+    height: "230dp"
+    md_bg_color: 0.9, 0.9, 0.8, 1
+
+    GridLayout:
+        rows: 1
+        padding: dp(20)
+
+        MDTextField:
+            id: task_text
+            hint_text: "Add a Task"
+            theme_text_color: "Custom"
+            text_color: 0.6, 0.4, 0.2, 1
+            pos_hint: {"center_y": .4}
+            max_text_length: 50
+            on_text_validate: (app.add_task(task_text, f'{date_text.text} {time_text.text}'), app.close_dialog())
+            on_text: root.check_fields()
+            md_bg_color: 0.9, 0.9, 0.8, 1
+
+        MDIconButton:
+            icon: 'calendar'
+            theme_text_color: "Custom"
+            text_color: 0.6, 0.4, 0.2, 1
+            on_release: root.show_date_picker()
+            padding: '10dp'
+
+        MDIconButton:
+            icon: 'clock'
+            theme_text_color: "Custom"
+            text_color: 0.6, 0.4, 0.2, 1
+            on_release: root.show_time_picker()
+            padding: '10dp'
+
+    MDLabel:
+        id: date_text
+        theme_text_color: "Custom"
+        text_color: 0.6, 0.4, 0.2, 1
+        spacing: '10dp'
+        padding: dp(20)
+
+    MDLabel:
+        id: time_text
+        theme_text_color: "Custom"
+        text_color: 0.6, 0.4, 0.2, 1
+        spacing: '10dp'
+        padding: dp(20)
+
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: dp(20)
+
+        MDRaisedButton:
+            id: save_button
+            text: "Save Task"
+            on_release: (app.add_task(task_text, f'{date_text.text} {time_text.text}'), app.close_dialog())
+            disabled: True
+            md_bg_color: 0.6, 0.4, 0.2, 1
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+
+        MDFlatButton:
+            text: 'Cancel'
+            theme_text_color: "Custom"
+            text_color: 0.6, 0.4, 0.2, 1
+            on_release: app.close_dialog()
+
+
+<ListItemWithCheckbox>:
+    id: the_list_item
+    markup: True
+    size_hint_y: None
+    height: dp(70)
+    theme_text_color: "Custom"
+    text_color: 0.6, 0.4, 0.2, 1
+
+    canvas.before:
+        Color:
+            rgba: 0.6, 0.4, 0.2, 1
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10)]
+
+        Color:
+            rgba: 1, 1, 1, 1
+        RoundedRectangle:
+            source: "photos/tas/very.png"
+            size: (self.width - dp(8)), (self.height - dp(8))
+            pos: (self.x + dp(4)), (self.y + dp(4))
+            radius: [dp(10)]
+
+    LeftCheckbox:
+        id: check
+        theme_text_color: "Custom"
+        text_color: 0.6, 0.4, 0.2, 1
+        on_release:
+            root.mark(check, the_list_item)
+
+    IconRightWidget:
+        icon: 'trash-can-outline'
+        theme_text_color: "Custom"
+        text_color: 0.6, 0.4, 0.2, 1
+        on_release:
+            root.delete_item(the_list_item)
 
