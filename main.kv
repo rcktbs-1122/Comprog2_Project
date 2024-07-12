@@ -1,6 +1,7 @@
 ScreenManager:
     StartupScreen:
     MainScreen:
+    CompletedTaskScreen:
 
 <StartupScreen>:
     name: 'startup'
@@ -8,7 +9,7 @@ ScreenManager:
     MDFloatLayout:
         canvas.before:
             Rectangle:
-                source: "photos/tas/6.jpg"
+                source: "photos/tas/5.jpg"
                 size: root.width, root.height
                 pos: self.pos
 
@@ -16,9 +17,9 @@ ScreenManager:
             id: app_name_label
             halign: 'center'
             markup: True
-            text: "[b][size=70]Just-Do IT[/size][/b]"
+            text: "[b][size=80]Just-Do IT[/size][/b]"
             font_name: "fonts/karmatic-arcade/ka1.ttf"
-            pos_hint: {'top': 0.7}
+            pos_hint: {'top': 0.9}
             size_hint_y: None
             height: dp(54)
             theme_text_color: "Custom"
@@ -65,7 +66,7 @@ ScreenManager:
             id: task_label
             halign: 'center'
             markup: True
-            text: "[b][size=57]Your To-do's[/size][/b]"
+            text: "[b][size=57]Your To-Do's[/size][/b]"
             font_name: "fonts/karmatic-arcade/ka1.ttf"
             pos_hint: {'top': 0.95}
             size_hint_y: None
@@ -97,31 +98,87 @@ ScreenManager:
                 on_release: app.sort_by_due_date()
                 elevation_normal: 12
                 size_hint: None, None
-                size: dp(75), dp(10)
+                size: dp(75), dp(13)
                 font_size: "7sp"
                 font_name: "fonts/karmatic-arcade/ka1.ttf"
                 md_bg_color: 0.9, 0.9, 0.8, 1
                 text_color: 0, 0, 0, 1
 
         ScrollView:
-            pos_hint: {'top': 0.7, 'center_x': 0.5}
-            size_hint: 0.9, 0.6
+            size_hint: (None, None)
+            size: (root.width, root.height - dp(240))
+            pos_hint: {"center_x": .5, "center_y": .45}
 
             MDList:
                 id: container
-                spacing: dp(10)
 
         MDRaisedButton:
-            text: "[b]Add a To-Do[/b]"
-            on_release: app.show_task_dialog()
+            text: "[b]Add Task[/b]"
             elevation_normal: 12
             size_hint: None, None
-            size: dp(200), dp(50)
-            font_size: "28sp"
+            size: dp(160), dp(50)
+            font_size: "18sp"
             font_name: "fonts/karmatic-arcade/ka1.ttf"
-            pos_hint: {'center_x': 0.5, 'y': 0.04}
+            pos_hint: {'center_x': 0.5, 'y': 0.1}
             text_color: 0, 0, 0, 1
             md_bg_color: 0.9, 0.9, 0.8, 1
+            on_release: app.show_task_dialog()
+
+        MDRaisedButton:
+            text: "[b]View my Completed To-Do's[/b]"
+            markup: True
+            size_hint: None, None
+            size: dp(200), dp(50)
+            pos_hint: {'center_x': 0.5, 'y': 0.2}
+            font_size: "20sp"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            on_release: app.root.current = 'completed_tasks'
+            text_color: 0, 0, 0, 1
+            md_bg_color: 0.9, 0.9, 0.8, 1
+
+
+<CompletedTaskScreen>:
+    name: 'completed_tasks'
+
+    MDFloatLayout:
+        canvas.before:
+            Rectangle:
+                source: "photos/tas/77.jpg"
+                size: root.width, root.height
+                pos: self.pos
+
+        MDLabel:
+            id: completed_tasks_label
+            halign: 'center'
+            markup: True
+            text: "[b][size=57]Completed To-Do's[/size][/b]"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            pos_hint: {'top': 0.95}
+            size_hint_y: None
+            height: dp(54)
+            theme_text_color: "Custom"
+            text_color: 0.9, 0.9, 0.8, 1
+
+        ScrollView:
+            size_hint: (None, None)
+            size: (root.width, root.height - dp(240))
+            pos_hint: {"center_x": .5, "center_y": .45}
+
+            MDList:
+                id: completed_tasks_list
+
+        MDRaisedButton:
+            text: "[b]Return[/b]"
+            markup: True
+            size_hint: None, None
+            size: dp(200), dp(50)
+            pos_hint: {'center_x': 0.5, 'y': 0.1}
+            font_size: "20sp"
+            font_name: "fonts/karmatic-arcade/ka1.ttf"
+            on_release: app.root.current = 'main'
+            text_color: 0, 0, 0, 1
+            md_bg_color: 0.9, 0.9, 0.8, 1
+
 <DialogContent>:
     orientation: "vertical"
     spacing: "10dp"
@@ -222,6 +279,7 @@ ScreenManager:
         text_color: 0.6, 0.4, 0.2, 1
         on_release:
             root.mark(check, the_list_item)
+
 
     IconRightWidget:
         icon: 'trash-can-outline'
