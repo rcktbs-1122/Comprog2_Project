@@ -1,5 +1,8 @@
 import sqlite3
+
+
 class Database:
+
     def __init__(self):
         self.con = sqlite3.connect('todo.db')
         self.cursor = self.con.cursor()
@@ -9,12 +12,9 @@ class Database:
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS tasks(id integer PRIMARY KEY AUTOINCREMENT, task varcahr(50) NOT NULL, due_date varchar(50), completed BOOLEAN NOT NULL CHECK (completed IN (0, 1)))")
 
-
     def create_task(self, task, due_date=None):
         self.cursor.execute("INSERT INTO tasks(task, due_date, completed) VALUES(?, ?, ?)", (task, due_date, 0))
         self.con.commit()
-
-        # Getting the last entered item to add in the list
         created_task = self.cursor.execute("SELECT id, task, due_date FROM tasks WHERE task = ? and completed = 0",
                                            (task,)).fetchall()
         return created_task[-1]
@@ -48,6 +48,9 @@ class Database:
         self.cursor.execute("DELETE FROM tasks WHERE id=?", (taskid,))
         self.con.commit()
 
+    def get_completed_tasks(self):
+        completed_tasks = self.cursor.execute("SELECT id, task, due_date FROM tasks WHERE completed = 1").fetchall()
+        return completed_tasks
+
     def close_db_connection(self):
         self.con.close()
-
