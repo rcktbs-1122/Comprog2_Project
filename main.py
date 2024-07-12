@@ -1,5 +1,4 @@
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.lang import Builder
 from kivymd.app import MDApp
 from datetime import datetime
 from kivymd.uix.dialog import MDDialog
@@ -10,6 +9,7 @@ from kivymd.uix.selectioncontrol import MDCheckbox
 from database import Database
 
 db = Database()
+
 
 class DialogContent(MDBoxLayout):
 
@@ -53,6 +53,8 @@ class ListItemWithCheckbox(TwoLineAvatarIconListItem):
         if check.active == True:
             the_list_item.text = '[s]' + the_list_item.text + '[/s]'
             db.mark_task_as_complete(the_list_item.pk)
+            app = MDApp.get_running_app()
+            app.move_task_to_completed_screen(the_list_item)
         else:
             the_list_item.text = str(db.mark_task_as_incomplete(the_list_item.pk))
 
@@ -64,72 +66,18 @@ class ListItemWithCheckbox(TwoLineAvatarIconListItem):
 class LeftCheckbox(ILeftBodyTouch, MDCheckbox):
     pass
 
-class MainApp(MDApp):
-    task_list_dialog = None
-
-    def build(self):
-        self.theme_cls.primary_palette = 'Brown'
-        self.theme_cls.theme_style = 'Light'
-
-
-    def show_task_dialog(self):
-        if not self.task_list_dialog:
-            self.task_list_dialog = MDDialog(
-                title="Create Task",
-                type="custom",
-                size_hint=(0.8, 0.8),
-                background_color=(0.6, 0.4, 0.2, 1),
-                md_bg_color=(0.6, 0.4, 0.2, 1),
-                content_cls=DialogContent(),
-            )
-        self.task_list_dialog.open()
-
-    def on_start(self):
-        try:
-            self.load_tasks()
-        except Exception as e:
-            print(e)
-
-    def load_tasks(self, sort_option='task'):
-        self.root.ids.container.clear_widgets()
-        incompleted_tasks, completed_tasks = db.get_tasks(sort_option)
-
-        if incompleted_tasks:
-            for task in incompleted_tasks:
-                add_task = ListItemWithCheckbox(pk=task[0], text=str(task[1]), secondary_text=task[2])
-                self.root.ids.container.add_widget(add_task)
-
-        if completed_tasks:
-            for task in completed_tasks:
-                add_task = ListItemWithCheckbox(pk=task[0], text='[s]' + str(task[1]) + '[/s]', secondary_text=task[2])
-                add_task.ids.check.active = True
-                self.root.ids.container.add_widget(add_task)
-
-    def close_dialog(self, *args):
-        self.task_list_dialog.dismiss()
-
-    def add_task(self, task, task_datetime):
-        created_task = db.create_task(task.text, task_datetime)
-
-        self.root.ids.container.add_widget(
-            ListItemWithCheckbox(pk=created_task[0], text='[b]' + str(created_task[1]) + '[/b]',
-                                 secondary_text=created_task[2]))
-        task.text = ''
-
-    def sort_tasks(self, sort_option):
-        self.load_tasks(sort_option)
-
-    def sort_alphabetically(self):
-        self.sort_tasks('task')
-
-    def sort_by_due_date(self):
-        self.sort_tasks('due_date')
 
 class MainScreen(Screen):
     pass
 
+
+class CompletedTaskScreen(Screen):
+    pass
+
+
 class StartupScreen(Screen):
     pass
+
 
 class MainApp(MDApp):
     task_list_dialog = None
@@ -141,9 +89,11 @@ class MainApp(MDApp):
         self.sm = ScreenManager()
         self.startup_screen = StartupScreen(name='startup')
         self.main_screen = MainScreen(name='main')
+        self.completed_tasks_screen = CompletedTaskScreen(name='completed_tasks')
 
         self.sm.add_widget(self.startup_screen)
         self.sm.add_widget(self.main_screen)
+        self.sm.add_widget(self.completed_tasks_screen)
 
         return self.sm
 
@@ -161,6 +111,12 @@ class MainApp(MDApp):
 
     def on_start(self):
         self.sm.current = 'startup'
+        try:
+            self.load_tasks()
+            self.load_completed_tasks()
+        except Exception as e:
+            print(e)
+
     def load_tasks(self, sort_option='task'):
         self.main_screen.ids.container.clear_widgets()
         incompleted_tasks, completed_tasks = db.get_tasks(sort_option)
@@ -170,11 +126,20 @@ class MainApp(MDApp):
                 add_task = ListItemWithCheckbox(pk=task[0], text=str(task[1]), secondary_text=task[2])
                 self.main_screen.ids.container.add_widget(add_task)
 
+    def load_completed_tasks(self):
+        self.completed_tasks_screen.ids.completed_tasks_list.clear_widgets()
+        _, completed_tasks = db.get_tasks()
+
         if completed_tasks:
             for task in completed_tasks:
                 add_task = ListItemWithCheckbox(pk=task[0], text='[s]' + str(task[1]) + '[/s]', secondary_text=task[2])
                 add_task.ids.check.active = True
-                self.main_screen.ids.container.add_widget(add_task)
+                add_task.ids.check.disabled = True
+                self.completed_tasks_screen.ids.completed_tasks_list.add_widget(add_task)
+
+    def load_completed_tasks_screen(self):
+        self.completed_tasks_screen.load_completed_tasks()
+        self.sm.current = 'completed_tasks'
 
     def close_dialog(self, *args):
         self.task_list_dialog.dismiss()
@@ -199,5 +164,12 @@ class MainApp(MDApp):
     def return_to_startup(self):
         self.sm.current = 'startup'
 
+    def move_task_to_completed_screen(self, list_item):
+        self.main_screen.ids.container.remove_widget(list_item)
+        list_item.ids.check.disabled = True
+        self.completed_tasks_screen.ids.completed_tasks_list.add_widget(list_item)
+
+
 if __name__ == '__main__':
     MainApp().run()
+
